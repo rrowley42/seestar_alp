@@ -1377,7 +1377,7 @@ class Seestar:
                     if 'result' in tmp:
                         cur_latlon = tmp["result"]
                 self.move_scope(0, 0, 0)
-
+                """
                 while True:
                     delta_lon = lon-cur_latlon[1]
                     if abs(delta_lon) < 5:
@@ -1390,6 +1390,39 @@ class Seestar:
                         break
                     time.sleep(0.1)
                     cur_latlon = self.send_message_param_sync({"method":"scope_get_horiz_coord"})["result"]
+                self.move_scope(0, 0, 0)
+                """
+
+                angle_difference = (lon-cur_latlon[1]) % 360
+                direction = 'cw' if angle_difference < 180 else 'ccw'
+
+                while True:
+                    self.move_scope(0 if direction == 'cw' else 180, 1000, 10)
+                    start_time = time.time()
+                    
+                    while time.time() - start_time < 10:
+                        cur_latlon = self.send_message_param_sync({"method":"scope_get_horiz_coord"})["result"]
+                        current_position = cur_latlon[1]
+                        error = lon - current_position
+                        
+                        if abs(error) <= 5:
+                            self.move_scope(0, 0, 0)
+                            break
+                        
+                        if (direction == 'cw' and error < 0) or (direction == 'ccw' and error > 0):
+                            #print("Overshot! Reversing direction.")
+                            self.move_scope(0, 0, 0)
+                            direction = 'ccw' if direction == 'cw' else 'cw'
+                            break  # Exit inner loop and restart movement
+                        
+                        time.sleep(0.1)
+
+                    if abs(error) <= 5:
+                        break  # Exit outer loop
+                
+                    self.move_scope(0, 0, 0)
+                    #print("Retrying movement...")
+                
                 self.move_scope(0, 0, 0)
 
                 cur_latlon = self.send_message_param_sync({"method":"scope_get_horiz_coord"})["result"]
