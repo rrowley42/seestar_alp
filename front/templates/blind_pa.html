@@ -4,6 +4,7 @@
 	<p class="h1">{% block title %}PA Refinement{% endblock %}</p>
   <p id="alt_err">alt error (deg): </p>
   <p id="az_err">az  error (deg): </p>
+  <p id="update">Updateing: </p>
 </div>
 
 <div class="slidecontainer">
@@ -173,6 +174,9 @@
   const startStopButton = document.getElementById("start_stop_btn");
   const alt_err = document.getElementById("alt_err")
   const az_err = document.getElementById("az_err")
+  const update = document.getElementById("update")
+  const characters = ['|', '/', '-', '\\'];
+  var char_index=0;
   startStopButton.textContent = "Start"
   var pa_interval
 
@@ -204,6 +208,12 @@
 
     alt_err.textContent = `alt error (deg): ${error_alt.toFixed(3)}`
     az_err.textContent =  `az  error (deg): ${error_az.toFixed(3)}`
+    const now = new Date();
+    const min = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    //time.textContent = `time min:sec: ${min}:${seconds}`
+    update.textContent = `Updateing: ${min}:${seconds} ${characters[char_index]}`
+    char_index = (char_index + 1) % characters.length;
   }
 
   async function update_pa_error() {
@@ -221,6 +231,13 @@
   }
 
   async function startAlignment() {
+    //const now = new Date();
+    //const min = String(now.getMinutes()).padStart(2, '0');
+    //const seconds = String(now.getSeconds()).padStart(2, '0');
+    //time.textContent = `time min:sec: ${min}:${seconds}`
+    //update.textContent = `Updateing: ${min}:${seconds} ${characters[char_index]}`
+    //char_index = (char_index + 1) % characters.length;
+    //return;
     try {
       var baseURL =
       `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}`;
